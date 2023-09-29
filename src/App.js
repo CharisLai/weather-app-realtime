@@ -1,15 +1,91 @@
 import React from 'react'
-// Step 1 載入 emotion styled套件
+//  載入 emotion styled套件
 import styled from '@emotion/styled'
+// 載入SVG 用as 修改名稱
+import { ReactComponent as DayCloudyIcon } from './images/day-cloudy.svg';
+import { ReactComponent as AirFlowIcon } from './images/airFlow.svg';
+import { ReactComponent as RainIcon } from './images/rain.svg';
+import { ReactComponent as RefreshIcon } from './images/refresh.svg';
 
+//  定義帶有styled 的元件
 
-// Step 2 定義帶有styled 的元件
+const AirFlow = styled.div`
+  display: flex;
+  align-items: center;
+  font-size: 16x;
+  font-weight: 300;
+  color: #828282;
+  margin-bottom: 20px;
+  svg {
+    width: 25px;
+    height: auto;
+    margin-right: 30px;
+  }
+`;
+
+const Celsius = styled.div`
+  font-weight: normal;
+  font-size: 42px;
+`;
+
 const Container = styled.div`
 	background-color: #ededed;
 	height: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+`;
+
+const CurrentWeather = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+`;
+
+const DayCloudy = styled(DayCloudyIcon)`
+  flex-basis: 30%;
+`;
+
+const Description = styled.div`
+  font-size: 16px;
+  color: #828282;
+  margin-bottom: 30px;
+`;
+
+const Location = styled.div`
+  font-size: 28px;
+  color: #212121;
+  margin-bottom: 20px;
+`;
+
+const Rain = styled.div`
+  display: flex;
+  align-items: center;
+  font-size: 16x;
+  font-weight: 300;
+  color: #828282;
+  svg {
+    width: 25px;
+    height: auto;
+    margin-right: 30px;
+  }
+`;
+
+const Refresh = styled(RefreshIcon)`
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  cursor: pointer;
+`;
+
+const Temperature = styled.div`
+  color: #757575;
+  font-size: 96px;
+  font-weight: 300;
+  display: flex;
 `;
 
 const WeatherCard = styled.div`
@@ -21,15 +97,32 @@ const WeatherCard = styled.div`
 	padding: 30px 15px;
 `;
 
-// Step 3 把上定義好的 styled-component 當成元件使用
+
+// 把上定義好的 styled-component 當成元件使用
 const App = () => {
   return (
     <Container>
       <WeatherCard>
-        <h1>Weather</h1>
+        <Location>台北市</Location>
+        <Description>多雲時晴</Description>
+        <CurrentWeather>
+          <Temperature>
+            23 <Celsius>°C</Celsius>
+          </Temperature>
+          <DayCloudy />
+        </CurrentWeather>
+        <AirFlow>
+          <AirFlowIcon /> 23 m/h
+        </AirFlow>
+        <Rain>
+          <RainIcon /> 48%
+        </Rain>
+        <Refresh>
+          最後觀測時間：上午 12:03 <RefreshIcon />
+        </Refresh>
       </WeatherCard>
     </Container>
-  )
-}
+  );
+};
 
 export default App
