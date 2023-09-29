@@ -1,20 +1,42 @@
-import React from 'react'
+import React, { useState } from 'react'
 //  載入 emotion styled套件
 import styled from '@emotion/styled'
+// 載入 ThemeProvider
+import { ThemeProvider } from '@emotion/react';
 // 載入SVG 用as 修改名稱
 import { ReactComponent as DayCloudyIcon } from './images/day-cloudy.svg';
 import { ReactComponent as AirFlowIcon } from './images/airFlow.svg';
 import { ReactComponent as RainIcon } from './images/rain.svg';
 import { ReactComponent as RefreshIcon } from './images/refresh.svg';
 
-//  定義帶有styled 的元件
+// 定義主題配色
+const theme = {
+  light: {
+    backgroundColor: '#ededed',
+    foregroundColor: '#f9f9f9',
+    boxShadow: '0 1px 3px 0 #999999',
+    titleColor: '#212121',
+    temperatureColor: '#757575',
+    textColor: '#828282',
+  },
+  dark: {
+    backgroundColor: '#1F2022',
+    foregroundColor: '#121416',
+    boxShadow:
+      '0 1px 4px 0 rgba(12, 12, 13, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.15)',
+    titleColor: '#f9f9fa',
+    temperatureColor: '#dddddd',
+    textColor: '#cccccc',
+  },
+};
 
+//  定義帶有styled 的元件
 const AirFlow = styled.div`
   display: flex;
   align-items: center;
   font-size: 16x;
   font-weight: 300;
-  color: #828282;
+  color:  ${({ theme }) => theme.textColor};
   margin-bottom: 20px;
   svg {
     width: 25px;
@@ -29,7 +51,7 @@ const Celsius = styled.div`
 `;
 
 const Container = styled.div`
-	background-color: #ededed;
+	background-color: ${({ theme }) => theme.backgroundColor};
 	height: 100%;
 	display: flex;
 	align-items: center;
@@ -49,13 +71,13 @@ const DayCloudy = styled(DayCloudyIcon)`
 
 const Description = styled.div`
   font-size: 16px;
-  color: #828282;
+  color:  ${({ theme }) => theme.textColor};
   margin-bottom: 30px;
 `;
 
 const Location = styled.div`
   font-size: 28px;
-  color: #212121;
+  color:  ${({ theme }) => theme.titleColor};
   margin-bottom: 20px;
 `;
 
@@ -64,7 +86,7 @@ const Rain = styled.div`
   align-items: center;
   font-size: 16x;
   font-weight: 300;
-  color: #828282;
+  color:  ${({ theme }) => theme.textColor};;
   svg {
     width: 25px;
     height: auto;
@@ -73,6 +95,7 @@ const Rain = styled.div`
 `;
 
 const Refresh = styled(RefreshIcon)`
+  color:  ${({ theme }) => theme.textColor};
   width: 15px;
   height: 15px;
   position: absolute;
@@ -82,7 +105,7 @@ const Refresh = styled(RefreshIcon)`
 `;
 
 const Temperature = styled.div`
-  color: #757575;
+  color:  ${({ theme }) => theme.temperatureColor};
   font-size: 96px;
   font-weight: 300;
   display: flex;
@@ -91,37 +114,39 @@ const Temperature = styled.div`
 const WeatherCard = styled.div`
 	position: relative;
 	min-width: 360px;
-	box-shadow: 0 1px 3px 0 #999999;
-	background-color: #f9f9f9;
+	box-shadow: ${({ theme }) => theme.backgroundColor};
+	background-color: ${({ theme }) => theme.foregroundColor};
 	box-sizing: border-box;
 	padding: 30px 15px;
 `;
 
-
 // 把上定義好的 styled-component 當成元件使用
 const App = () => {
+  const [currentTheme, setCurrentTheme] = useState('light');
   return (
-    <Container>
-      <WeatherCard>
-        <Location>台北市</Location>
-        <Description>多雲時晴</Description>
-        <CurrentWeather>
-          <Temperature>
-            23 <Celsius>°C</Celsius>
-          </Temperature>
-          <DayCloudy />
-        </CurrentWeather>
-        <AirFlow>
-          <AirFlowIcon /> 23 m/h
-        </AirFlow>
-        <Rain>
-          <RainIcon /> 48%
-        </Rain>
-        <Refresh>
-          最後觀測時間：上午 12:03 <RefreshIcon />
-        </Refresh>
-      </WeatherCard>
-    </Container>
+    <ThemeProvider theme={theme[currentTheme]} >
+      <Container >
+        <WeatherCard>
+          <Location>台北市</Location>
+          <Description>多雲時晴</Description>
+          <CurrentWeather>
+            <Temperature>
+              23 <Celsius>°C</Celsius>
+            </Temperature>
+            <DayCloudy />
+          </CurrentWeather>
+          <AirFlow>
+            <AirFlowIcon /> 23 m/h
+          </AirFlow>
+          <Rain>
+            <RainIcon /> 48%
+          </Rain>
+          <Refresh>
+            最後觀測時間：上午 12:03 <RefreshIcon />
+          </Refresh>
+        </WeatherCard>
+      </Container >
+    </ThemeProvider >
   );
 };
 
