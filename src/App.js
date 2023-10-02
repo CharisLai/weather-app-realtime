@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 //  載入 emotion styled套件
 import styled from '@emotion/styled'
 // 載入 ThemeProvider
@@ -136,7 +136,7 @@ const WeatherCard = styled.div`
 
 // 把上定義好的 styled-component 當成元件使用
 const App = () => {
-
+  console.log('invoke function component')
   const [currentTheme, setCurrentTheme] = useState('dark');
   const [currentWeather, setCurrentWeather] = useState({
     // observationTime: '2020-12-12 22:10:00',
@@ -147,8 +147,13 @@ const App = () => {
     rainPossibility: 60,
   })
 
+  useEffect(() => {
+    console.log('execute function in useEffect');
+    fetchCurrentWeather();
+  }, [])
+
   // handleClick
-  const handleClick = () => {
+  const fetchCurrentWeather = () => {
     fetch(
       `https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=${AUTHORIZATION_KEY}&locationName=${LOCATION_NAME_FORECAST}`
     )
@@ -166,9 +171,13 @@ const App = () => {
           }, {}
         )
         setCurrentWeather({
-          ...currentWeather,
+          // ...currentWeather,
+          observationTime: locationData.time.obsTime,
+          locationName: locationData.locationName,
           temperature: weatherElements.TEMP,
-
+          windSpeed: weatherElements.WDSD,
+          description: '多雲時晴',
+          rainPossibility: 60,
         })
         console.log(currentWeather)
       });
@@ -178,6 +187,7 @@ const App = () => {
   return (
     <ThemeProvider theme={theme[currentTheme]} >
       <Container >
+        {console.log('render')}
         <WeatherCard>
           <Location>{currentWeather.locationName}</Location>
           <Description>{currentWeather.description}</Description>
@@ -196,7 +206,7 @@ const App = () => {
             <RainIcon />
             {currentWeather.rainPossibility} %
           </Rain>
-          <Refresh onClick={handleClick} >
+          <Refresh onClick={fetchCurrentWeather} >
             最後觀測時間：
             {new Intl.DateTimeFormat('zh-TW', {
               hour: 'numeric',
