@@ -3,11 +3,18 @@ import React, { useState } from 'react'
 import styled from '@emotion/styled'
 // 載入 ThemeProvider
 import { ThemeProvider } from '@emotion/react';
+import dayjs from 'dayjs';
 // 載入SVG 用as 修改名稱
 import { ReactComponent as DayCloudyIcon } from './images/day-cloudy.svg';
 import { ReactComponent as AirFlowIcon } from './images/airFlow.svg';
 import { ReactComponent as RainIcon } from './images/rain.svg';
 import { ReactComponent as RefreshIcon } from './images/refresh.svg';
+
+// 中央氣象
+const AUTHORIZATION_KEY = 'CWB-4ADAF3DC-97E6-41E6-853F-469F6B27FF31';
+
+// 預設地點
+const LOCATION_NAME_FORECAST = '高雄';
 
 // 定義主題配色
 const theme = {
@@ -94,14 +101,21 @@ const Rain = styled.div`
   }
 `;
 
-const Refresh = styled(RefreshIcon)`
-  color:  ${({ theme }) => theme.textColor};
-  width: 15px;
-  height: 15px;
+const Refresh = styled.div`
   position: absolute;
+  color:  ${({ theme }) => theme.textColor};
   right: 15px;
   bottom: 15px;
-  cursor: pointer;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: flex-end;
+  
+  svg {
+    margin-left: 10px;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+  }
 `;
 
 const Temperature = styled.div`
@@ -122,27 +136,73 @@ const WeatherCard = styled.div`
 
 // 把上定義好的 styled-component 當成元件使用
 const App = () => {
-  const [currentTheme, setCurrentTheme] = useState('light');
+
+  const [currentTheme, setCurrentTheme] = useState('dark');
+  const [currentWeather, setCurrentWeather] = useState({
+    // observationTime: '2020-12-12 22:10:00',
+    locationName: '高雄市',
+    description: '多雲時晴',
+    windSpeed: 3.6,
+    temperature: 32.1,
+    rainPossibility: 60,
+  })
+
+  // handleClick
+  const handleClick = () => {
+    fetch(
+      `https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=${AUTHORIZATION_KEY}&locationName=${LOCATION_NAME_FORECAST}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        // console.log('data', data)
+        const locationData = data.records.location[0];
+
+        const weatherElements = locationData.weatherElement.reduce(
+          (neededElements, item) => {
+            if (['WDSD', 'TEMP'].includes(item.elementName)) {
+              neededElements[item.elementName] = item.elementValue;
+            }
+            return neededElements;
+          }, {}
+        )
+        setCurrentWeather({
+          ...currentWeather,
+          temperature: weatherElements.TEMP,
+
+        })
+        console.log(currentWeather)
+      });
+  }
+
+
   return (
     <ThemeProvider theme={theme[currentTheme]} >
       <Container >
         <WeatherCard>
-          <Location>台北市</Location>
-          <Description>多雲時晴</Description>
+          <Location>{currentWeather.locationName}</Location>
+          <Description>{currentWeather.description}</Description>
           <CurrentWeather>
             <Temperature>
-              23 <Celsius>°C</Celsius>
+              {Math.round(currentWeather.temperature)}
+              <Celsius>°C</Celsius>
             </Temperature>
             <DayCloudy />
           </CurrentWeather>
           <AirFlow>
-            <AirFlowIcon /> 23 m/h
+            <AirFlowIcon />
+            {currentWeather.windSpeed} m/h
           </AirFlow>
           <Rain>
-            <RainIcon /> 48%
+            <RainIcon />
+            {currentWeather.rainPossibility} %
           </Rain>
-          <Refresh>
-            最後觀測時間：上午 12:03 <RefreshIcon />
+          <Refresh onClick={handleClick} >
+            最後觀測時間：
+            {new Intl.DateTimeFormat('zh-TW', {
+              hour: 'numeric',
+              minute: 'numeric',
+            }).format(dayjs(currentWeather.observationTime))}{''}
+            <RefreshIcon />
           </Refresh>
         </WeatherCard>
       </Container >
