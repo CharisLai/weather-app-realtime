@@ -9,12 +9,7 @@ import { ReactComponent as DayCloudyIcon } from './images/day-cloudy.svg';
 import { ReactComponent as AirFlowIcon } from './images/airFlow.svg';
 import { ReactComponent as RainIcon } from './images/rain.svg';
 import { ReactComponent as RefreshIcon } from './images/refresh.svg';
-
-// 中央氣象
-const AUTHORIZATION_KEY = 'CWB-4ADAF3DC-97E6-41E6-853F-469F6B27FF31';
-
-// 預設地點
-const LOCATION_NAME_FORECAST = '高雄';
+import { ReactComponent as LoadingIcon } from './images/loading.svg';
 
 // 定義主題配色
 const theme = {
@@ -115,6 +110,16 @@ const Refresh = styled.div`
     width: 15px;
     height: 15px;
     cursor: pointer;
+    animation: rotate infinite 1.5s linear;
+    animation-duration: ${({ isLoading }) => (isLoading ? '1.5s' : '0s')} 
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(360deg);
+    } to {
+      transform: rotate(0deg);
+    }
   }
 `;
 
@@ -134,17 +139,24 @@ const WeatherCard = styled.div`
 	padding: 30px 15px;
 `;
 
+// 中央氣象
+const AUTHORIZATION_KEY = 'CWB-4ADAF3DC-97E6-41E6-853F-469F6B27FF31';
+
+// 預設地點
+const LOCATION_NAME = '高雄';
+
 // 把上定義好的 styled-component 當成元件使用
 const App = () => {
   console.log('invoke function component')
   const [currentTheme, setCurrentTheme] = useState('dark');
   const [currentWeather, setCurrentWeather] = useState({
-    // observationTime: '2020-12-12 22:10:00',
+    observationTime: '2020-12-12 22:10:00',
     locationName: '高雄市',
     description: '多雲時晴',
     windSpeed: 3.6,
     temperature: 32.1,
     rainPossibility: 60,
+    isLoading: true,
   })
 
   useEffect(() => {
@@ -154,14 +166,19 @@ const App = () => {
 
   // handleClick
   const fetchCurrentWeather = () => {
+    // 再透過物件的解構賦值把原資料帶入
+    setCurrentWeather((prevState) => ({
+      ...prevState,
+      isLoading: true,
+    }));
+
     fetch(
-      `https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=${AUTHORIZATION_KEY}&locationName=${LOCATION_NAME_FORECAST}`
+      `https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=${AUTHORIZATION_KEY}&locationName=${LOCATION_NAME}`
     )
       .then((response) => response.json())
       .then((data) => {
         // console.log('data', data)
         const locationData = data.records.location[0];
-
         const weatherElements = locationData.weatherElement.reduce(
           (neededElements, item) => {
             if (['WDSD', 'TEMP'].includes(item.elementName)) {
@@ -171,48 +188,59 @@ const App = () => {
           }, {}
         )
         setCurrentWeather({
-          // ...currentWeather,
           observationTime: locationData.time.obsTime,
           locationName: locationData.locationName,
           temperature: weatherElements.TEMP,
           windSpeed: weatherElements.WDSD,
           description: '多雲時晴',
           rainPossibility: 60,
+          isLoading: false,
         })
-        console.log(currentWeather)
       });
   }
 
+  const {
+    observationTime,
+    locationName,
+    description,
+    windSpeed,
+    temperature,
+    rainPossibility,
+    isLoading,
+  } = currentWeather;
 
   return (
     <ThemeProvider theme={theme[currentTheme]} >
       <Container >
         {console.log('render')}
         <WeatherCard>
-          <Location>{currentWeather.locationName}</Location>
-          <Description>{currentWeather.description}</Description>
+          <Location>{locationName}</Location>
+          <Description>{description}</Description>
           <CurrentWeather>
             <Temperature>
-              {Math.round(currentWeather.temperature)}
+              {Math.round(temperature)}
               <Celsius>°C</Celsius>
             </Temperature>
             <DayCloudy />
           </CurrentWeather>
           <AirFlow>
             <AirFlowIcon />
-            {currentWeather.windSpeed} m/h
+            {windSpeed} m/h
           </AirFlow>
           <Rain>
             <RainIcon />
-            {currentWeather.rainPossibility} %
+            {rainPossibility} %
           </Rain>
-          <Refresh onClick={fetchCurrentWeather} >
+          <Refresh
+            onClick={fetchCurrentWeather}
+            isLoading={isLoading}
+          >
             最後觀測時間：
             {new Intl.DateTimeFormat('zh-TW', {
               hour: 'numeric',
               minute: 'numeric',
-            }).format(dayjs(currentWeather.observationTime))}{''}
-            <RefreshIcon />
+            }).format(dayjs(observationTime))}{''}
+            {isLoading ? <LoadingIcon /> : <RefreshIcon />}
           </Refresh>
         </WeatherCard>
       </Container >
