@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 //  載入 emotion styled套件
 import styled from '@emotion/styled'
 // 載入 ThemeProvider
@@ -198,7 +198,6 @@ const fetchWeatherForecast = () => {
 };
 
 const App = () => {
-  console.log('--- invoke function component ---');
   const [currentTheme, setCurrentTheme] = useState('dark');
   const [weatherElement, setWeatherElement] = useState({
     observationTime: new Date(),
@@ -212,27 +211,28 @@ const App = () => {
     isLoading: true,
   });
 
-  useEffect(() => {
-    // 1. 在useEffect 定義 async function 
-    const fetchData = async () => {
-      setWeatherElement((prevState) => ({
-        ...prevState,
-        isLoading: true,
-      }));
-      // 2. 使用 Promise.all 搭配 await 等待兩個API都取得回應後才繼續
-      const [currentWeather, weatherForecast] = await Promise.all([
-        fetchCurrentWeather(),
-        fetchWeatherForecast(),
-      ]);
+  // 因 useEffect 和onClick 共用 所以從useEffect 移出
+  const fetchData = useCallback(async () => {
+    setWeatherElement((prevState) => ({
+      ...prevState,
+      isLoading: true,
+    }));
+    // 2. 使用 Promise.all 搭配 await 等待兩個API都取得回應後才繼續
+    const [currentWeather, weatherForecast] = await Promise.all([
+      fetchCurrentWeather(),
+      fetchWeatherForecast(),
+    ]);
 
-      setWeatherElement({
-        ...currentWeather,
-        ...weatherForecast,
-        isLoading: false,
-      });
-    };
-    fetchData();
+    setWeatherElement({
+      ...currentWeather,
+      ...weatherForecast,
+      isLoading: false,
+    });
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const {
     observationTime,
@@ -267,10 +267,7 @@ const App = () => {
             <RainIcon /> {rainPossibility}%
           </Rain>
           <Refresh
-            onClick={() => {
-              fetchCurrentWeather();
-              fetchWeatherForecast();
-            }}
+            onClick={fetchData}
             isLoading={isLoading}
           >
             最後觀測時間：
