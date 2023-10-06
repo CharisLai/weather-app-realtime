@@ -47,9 +47,11 @@ const AUTHORIZATION_KEY = 'CWB-4ADAF3DC-97E6-41E6-853F-469F6B27FF31';
 
 const App = () => {
 
+  // 從localStorage 取出先前保存的地區，若沒有保存過就給予預設值
+  const storageCity = localStorage.getItem('cityName') || '高雄市';
   const [currentPage, setCurrentPage] = useState('WeatherCard')
   const [currentTheme, setCurrentTheme] = useState('dark');
-  const [currentCity, setCurrentCity] = useState('高雄市');
+  const [currentCity, setCurrentCity] = useState(storageCity);
 
   // 透過props傳遞函式 從父元件將修改資料方法來 傳遞到子元件：轉換設定頁面
   const handleCurrentPageChange = (currentPage) => {

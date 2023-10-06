@@ -91,9 +91,10 @@ const WeatherSetting = ({ cityName, handleCurrentCityChange, handleCurrentPageCh
   }
 
   const handleSave = () => {
-    console.log('locationName', locationName)
+
     handleCurrentCityChange(locationName);
     handleCurrentPageChange('WeatherCard');
+    localStorage.setItem('cityName', locationName)
   }
   return (
     <WeatherSettingWrapper>
