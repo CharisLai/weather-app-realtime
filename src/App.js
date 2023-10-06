@@ -4,7 +4,7 @@ import styled from '@emotion/styled'
 // 載入 ThemeProvider
 import { ThemeProvider } from '@emotion/react';
 
-import { getMoment } from './utils/helpers';
+import { getMoment, findLocation } from './utils/helpers';
 import WeatherCard from './views/WeatherCard';
 import useWeatherAPI from './hooks/useWeatherAPI';
 
@@ -44,25 +44,34 @@ const Container = styled.div`
 const AUTHORIZATION_KEY = 'CWB-4ADAF3DC-97E6-41E6-853F-469F6B27FF31';
 
 // 預設地點
-const LOCATION_NAME = '高雄';
-const LOCATION_NAME_FORECAST = '高雄市';
 
 const App = () => {
-  const [weatherElement, fetchData] = useWeatherAPI({
-    locationName: LOCATION_NAME,
-    cityName: LOCATION_NAME_FORECAST,
-    authorizationKey: AUTHORIZATION_KEY,
-  });
+
   const [currentPage, setCurrentPage] = useState('WeatherCard')
   const [currentTheme, setCurrentTheme] = useState('dark');
+  const [currentCity, setCurrentCity] = useState('高雄市');
 
   // 透過props傳遞函式 從父元件將修改資料方法來 傳遞到子元件：轉換設定頁面
   const handleCurrentPageChange = (currentPage) => {
     setCurrentPage(currentPage);
   };
 
-  const moment = useMemo(() => getMoment(LOCATION_NAME_FORECAST), []);
+  const handleCurrentCityChange = (currentCity) => {
+    setCurrentCity(currentCity);
+  }
 
+  const currentLocation = useMemo(() => findLocation(currentCity),
+    [currentCity]);
+
+  const { cityName, locationName, sunriseCityName } = currentLocation;
+
+  const moment = useMemo(() => getMoment(sunriseCityName), [sunriseCityName]);
+
+  const [weatherElement, fetchData] = useWeatherAPI({
+    locationName,
+    cityName,
+    authorizationKey: AUTHORIZATION_KEY,
+  });
   useEffect(() => {
     setCurrentTheme(moment === 'day' ? 'light' : 'dark');
   }, [moment]);
@@ -72,13 +81,18 @@ const App = () => {
       <Container>
         {currentPage === 'WeatherCard' && (
           <WeatherCard
+            cityName={cityName}
             weatherElement={weatherElement}
             moment={moment}
             fetchData={fetchData}
+            handleCurrentCityChange={handleCurrentCityChange}
             handleCurrentPageChange={handleCurrentPageChange}
           />
         )}
-        {currentPage === 'WeatherSetting' && (<WeatherSetting handleCurrentPageChange={handleCurrentPageChange} />)}
+        {currentPage === 'WeatherSetting' && (
+          <WeatherSetting cityName={cityName}
+            handleCurrentPageChange={handleCurrentPageChange}
+            handleCurrentCityChange={handleCurrentCityChange} />)}
       </Container>
     </ThemeProvider>
   );
