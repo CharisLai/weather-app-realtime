@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import dayjs from 'dayjs';
 
 import WeatherIcon from '../components/WeatherIcon.js';
+import { ReactComponent as CogIcon } from './../images/cog.svg';
 
 // 載入SVG 用as 修改名稱
 import { ReactComponent as AirFlowIcon } from './../images/airFlow.svg';
@@ -107,52 +108,61 @@ const Temperature = styled.div`
   display: flex;
 `;
 
+const Cog = styled(CogIcon)`
+  position: absolute;
+  top: 30px;
+  right: 15px;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+`
 
-const WeatherCard = ({ weatherElement, moment, fetchData }) => {
+const WeatherCard = ({ weatherElement, moment, fetchData, handleCurrentPageChange }) => {
 
-    const {
-        observationTime,
-        locationName,
-        description,
-        windSpeed,
-        temperature,
-        rainPossibility,
-        isLoading,
-        comfortability,
-        weatherCode,
-    } = weatherElement;
+  const {
+    observationTime,
+    locationName,
+    description,
+    windSpeed,
+    temperature,
+    rainPossibility,
+    isLoading,
+    comfortability,
+    weatherCode,
+  } = weatherElement;
 
-    return (
-        <WeatherCardWrapper>
-            <Location>{locationName}</Location>
-            <Description>
-                {description} {comfortability}
-            </Description>
-            <CurrentWeather>
-                <Temperature>
-                    {Math.round(temperature)} <Celsius>°C</Celsius>
-                </Temperature>
-                <WeatherIcon weatherCode={weatherCode} moment={moment} />
-            </CurrentWeather>
-            <AirFlow>
-                <AirFlowIcon /> {windSpeed} m/h
-            </AirFlow>
-            <Rain>
-                <RainIcon /> {rainPossibility} %
-            </Rain>
-            <Refresh
-                onClick={fetchData}
-                isLoading={isLoading}
-            >
-                最後觀測時間：
-                {new Intl.DateTimeFormat('zh-TW', {
-                    hour: 'numeric',
-                    minute: 'numeric',
-                }).format(dayjs(observationTime))}{' '}
-                {isLoading ? <LoadingIcon /> : <RefreshIcon />}
-            </Refresh>
-        </WeatherCardWrapper>
-    )
+  return (
+    <WeatherCardWrapper>
+      <Cog onClick={() => handleCurrentPageChange('WeatherSetting')} />
+      <Location>{locationName}</Location>
+      <Description>
+        {description} {comfortability}
+      </Description>
+      <CurrentWeather>
+        <Temperature>
+          {Math.round(temperature)} <Celsius>°C</Celsius>
+        </Temperature>
+        <WeatherIcon weatherCode={weatherCode} moment={moment} />
+      </CurrentWeather>
+      <AirFlow>
+        <AirFlowIcon /> {windSpeed} m/h
+      </AirFlow>
+      <Rain>
+        <RainIcon /> {rainPossibility} %
+      </Rain>
+      <Refresh
+        onClick={fetchData}
+        isLoading={isLoading}
+      >
+        最後觀測時間：
+        {new Intl.DateTimeFormat('zh-TW', {
+          hour: 'numeric',
+          minute: 'numeric',
+        }).format(dayjs(observationTime))}{' '}
+        {isLoading ? <LoadingIcon /> : <RefreshIcon />}
+      </Refresh>
+    </WeatherCardWrapper>
+  )
 }
 
 export default WeatherCard

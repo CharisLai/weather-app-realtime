@@ -7,6 +7,9 @@ import { ThemeProvider } from '@emotion/react';
 import { getMoment } from './utils/helpers';
 import WeatherCard from './views/WeatherCard';
 import useWeatherAPI from './hooks/useWeatherAPI';
+
+import WeatherSetting from './views/WeatherSetting';
+
 // 定義主題配色
 const theme = {
   light: {
@@ -50,7 +53,14 @@ const App = () => {
     cityName: LOCATION_NAME_FORECAST,
     authorizationKey: AUTHORIZATION_KEY,
   });
+  const [currentPage, setCurrentPage] = useState('WeatherCard')
   const [currentTheme, setCurrentTheme] = useState('dark');
+
+  // 透過props傳遞函式 從父元件將修改資料方法來 傳遞到子元件：轉換設定頁面
+  const handleCurrentPageChange = (currentPage) => {
+    setCurrentPage(currentPage);
+  };
+
   const moment = useMemo(() => getMoment(LOCATION_NAME_FORECAST), []);
 
   useEffect(() => {
@@ -60,7 +70,15 @@ const App = () => {
   return (
     <ThemeProvider theme={theme[currentTheme]}>
       <Container>
-        <WeatherCard weatherElement={weatherElement} moment={moment} fetchData={fetchData} />
+        {currentPage === 'WeatherCard' && (
+          <WeatherCard
+            weatherElement={weatherElement}
+            moment={moment}
+            fetchData={fetchData}
+            handleCurrentPageChange={handleCurrentPageChange}
+          />
+        )}
+        {currentPage === 'WeatherSetting' && (<WeatherSetting handleCurrentPageChange={handleCurrentPageChange} />)}
       </Container>
     </ThemeProvider>
   );
