@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 //  載入 emotion styled套件
 import styled from '@emotion/styled'
 // 載入 ThemeProvider
@@ -6,7 +6,7 @@ import { ThemeProvider } from '@emotion/react';
 
 import { getMoment } from './utils/helpers';
 import WeatherCard from './views/WeatherCard';
-
+import useWeatherAPI from './hooks/useWeatherAPI';
 // 定義主題配色
 const theme = {
   light: {
@@ -44,99 +44,18 @@ const AUTHORIZATION_KEY = 'CWB-4ADAF3DC-97E6-41E6-853F-469F6B27FF31';
 const LOCATION_NAME = '高雄';
 const LOCATION_NAME_FORECAST = '高雄市';
 
-const fetchCurrentWeather = () => {
-  return fetch(
-    `https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=${AUTHORIZATION_KEY}&locationName=${LOCATION_NAME}`
-  )
-    .then((response) => response.json())
-    .then((data) => {
-      const locationData = data.records.location[0];
-      const weatherElements = locationData.weatherElement.reduce(
-        (neededElements, item) => {
-          if (['WDSD', 'TEMP'].includes(item.elementName)) {
-            neededElements[item.elementName] = item.elementValue;
-          }
-          return neededElements;
-        },
-        {}
-      );
-
-      return {
-        observationTime: locationData.time.obsTime,
-        locationName: locationData.locationName,
-        temperature: weatherElements.TEMP,
-        windSpeed: weatherElements.WDSD,
-      };
-    });
-};
-
-const fetchWeatherForecast = () => {
-  return fetch(
-    `https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=${AUTHORIZATION_KEY}&locationName=${LOCATION_NAME_FORECAST}`
-  )
-    .then((response) => response.json())
-    .then((data) => {
-      const locationData = data.records.location[0];
-      const weatherElements = locationData.weatherElement.reduce(
-        (neededElements, item) => {
-          if (['Wx', 'PoP', 'CI'].includes(item.elementName)) {
-            neededElements[item.elementName] = item.time[0].parameter;
-          }
-          return neededElements;
-        },
-        {}
-      );
-      return {
-        description: weatherElements.Wx.parameterName,
-        weatherCode: weatherElements.Wx.parameterValue,
-        rainPossibility: weatherElements.PoP.parameterName,
-        comfortability: weatherElements.CI.parameterName,
-      };
-    });
-};
-
 const App = () => {
-  const [currentTheme, setCurrentTheme] = useState('dark');
-  const [weatherElement, setWeatherElement] = useState({
-    observationTime: new Date(),
-    locationName: '',
-    temperature: 0,
-    windSpeed: 0,
-    description: '',
-    weatherCode: 0,
-    rainPossibility: 0,
-    comfortability: '',
-    isLoading: true,
+  const [weatherElement, fetchData] = useWeatherAPI({
+    locationName: LOCATION_NAME,
+    cityName: LOCATION_NAME_FORECAST,
+    authorizationKey: AUTHORIZATION_KEY,
   });
-
+  const [currentTheme, setCurrentTheme] = useState('dark');
   const moment = useMemo(() => getMoment(LOCATION_NAME_FORECAST), []);
 
   useEffect(() => {
     setCurrentTheme(moment === 'day' ? 'light' : 'dark');
   }, [moment]);
-
-  // 因 useEffect 和onClick 共用 所以從useEffect 移出
-  const fetchData = useCallback(async () => {
-    setWeatherElement((prevState) => ({
-      ...prevState,
-      isLoading: true,
-    }));
-    // 2. 使用 Promise.all 搭配 await 等待兩個API都取得回應後才繼續
-    const [currentWeather, weatherForecast] = await Promise.all([
-      fetchCurrentWeather(),
-      fetchWeatherForecast(),
-    ]);
-
-    setWeatherElement({
-      ...currentWeather,
-      ...weatherForecast,
-      isLoading: false,
-    });
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
 
   return (
     <ThemeProvider theme={theme[currentTheme]}>
