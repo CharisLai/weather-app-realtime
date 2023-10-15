@@ -1,6 +1,8 @@
 {
-  "name": "weather-app",
+  "name": "weather-app-realtime",
+  "homepage": "https://CharisLai.github.io/weather-app-realtime",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "dependencies": {
     "@emotion/core": "^11.0.0",
@@ -11,6 +13,7 @@
     "@testing-library/user-event": "^13.5.0",
     "dayjs": "^1.11.10",
     "emotion-theming": "^11.0.0",
+    "gh-pages": "^6.0.0",
     "normalize.css": "^8.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -21,6 +24,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -40,5 +45,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.1"
   }
 }

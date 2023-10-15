@@ -4,11 +4,11 @@ import styled from '@emotion/styled'
 // 載入 ThemeProvider
 import { ThemeProvider } from '@emotion/react';
 
-import { getMoment, findLocation } from './utils/helpers';
-import WeatherCard from './views/WeatherCard';
-import useWeatherAPI from './hooks/useWeatherAPI';
+import { getMoment, findLocation } from './utils/helpers.js';
+import WeatherCard from './views/WeatherCard.js';
+import useWeatherAPI from './hooks/useWeatherAPI.js';
 
-import WeatherSetting from './views/WeatherSetting';
+import WeatherSetting from './views/WeatherSetting.js';
 
 // 定義主題配色
 const theme = {

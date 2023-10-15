@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { availableLocations } from './../utils/helpers';
+import { availableLocations } from './../utils/helpers.js';
 import styled from '@emotion/styled';
 
 const WeatherSettingWrapper = styled.div`
@@ -98,7 +98,6 @@ const WeatherSetting = ({ cityName, handleCurrentCityChange, handleCurrentPageCh
   }
   return (
     <WeatherSettingWrapper>
-
       <Title>設定</Title>
       <StyledLabel htmlFor="location">地區</StyledLabel>
       <StyledSelect
@@ -112,7 +111,6 @@ const WeatherSetting = ({ cityName, handleCurrentCityChange, handleCurrentPageCh
           </option>
         ))}
       </StyledSelect>
-
       <ButtonGroup>
         <Back onClick={() => handleCurrentPageChange('WeatherCard')}>返回</Back>
         <Save onClick={handleSave}>儲存</Save>
